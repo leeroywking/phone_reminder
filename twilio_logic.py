@@ -19,9 +19,9 @@ def make_call(outgoing_number):
     print(call.sid)
 
 #970-hi-0-a-lee
+default_text = 'reply with the text "call me" to receive a call or "help me drink X water" or "I drank X water" for water tracking goals'
 
-
-def make_text(outgoing_number, body='reply with the text "call me" to receive a call'): 
+def make_text(outgoing_number, body=default_text): 
     message = client.messages.create(
                                 body=body,  
                                 to=outgoing_number,
