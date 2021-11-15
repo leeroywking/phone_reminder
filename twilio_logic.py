@@ -21,9 +21,9 @@ def make_call(outgoing_number):
 #970-hi-0-a-lee
 
 
-def make_text(outgoing_number): 
+def make_text(outgoing_number, body='reply with the text "call me" to receive a call'): 
     message = client.messages.create(
-                                body='reply with the text "call me" to receive a call',  
+                                body=body,  
                                 to=outgoing_number,
                                 messaging_service_sid='MGd95c1d83c6ddffdea9172ffbf68d2c30'
                             ) 
