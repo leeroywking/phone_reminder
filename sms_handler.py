@@ -34,7 +34,7 @@ def sms_handler(Users, request):
             current_user.water_drank = 0
             current_user.save()
             make_text(from_number, f"You wanna drink {goal} today you have drank 0/{goal}")
-    elif "i drank" in body.lower():
+    elif "drank" in body.lower() or "drunk" in body.lower():
         drank = re.search("\d+", body)[0]
         if drank:
             current_user.water_drank = current_user.water_drank + int(drank)

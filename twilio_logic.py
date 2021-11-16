@@ -19,7 +19,17 @@ def make_call(outgoing_number):
     print(call.sid)
 
 #970-hi-0-a-lee
-default_text = 'reply with the text "call me" to receive a call or "help me drink X water" or "I drank X water" for water tracking goals'
+div = "\n----------\n"
+default_text = (
+    f'You can reply with the text "call me" to receive a call.'\
+    f'{div}Water tracking commands{div}' \
+    f'FIRST - to set your goal send\n'\
+    f'"help me drink 10 glasses of water" or\n'\
+    f'"help me drink 100oz of water"\n(can be any unit){div}'\
+    f'THEN - update progress send\n'\
+    f'"I drank 1 glass of water" or\n'\
+    f'"I have drunk 2 glasses already"'
+)
 
 def make_text(outgoing_number, body=default_text): 
     message = client.messages.create(
