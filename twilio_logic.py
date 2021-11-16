@@ -1,5 +1,6 @@
 import os
 from twilio.rest import Client
+from twilio.twiml.voice_response import VoiceResponse, Play
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -8,15 +9,23 @@ load_dotenv()
 # and set the environment variables. See http://twil.io/secure
 account_sid = os.environ['TWILIO_ACCOUNT_SID']
 auth_token = os.environ['TWILIO_AUTH_TOKEN']
-client = Client(account_sid, auth_token)
+client = Client(account_sid, auth_token)\
 
-def make_call(outgoing_number):
+BASE_URL = os.environ.get("BASE_URL")
+
+def make_call(outgoing_number, file_name):
     call = client.calls.create(
-                            url=f'{os.environ.get("BASE_URL")}/static/wakeup.xml',
+                            url=f'{BASE_URL}/static/{file_name}',
                             to=outgoing_number,
                             from_='+14252175622'
                         )
     print(call.sid)
+
+def make_play(file_name):
+    response = VoiceResponse()
+    response.play(f'{BASE_URL}/static/{file_name}.mp3', loop=2)
+    return str(response)
+
 
 #970-hi-0-a-lee
 div = "\n----------\n"

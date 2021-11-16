@@ -1,5 +1,5 @@
-from flask import Flask, send_file, request
-from twilio_logic import make_call, make_text
+from flask import Flask, send_file, request, Response
+from twilio_logic import make_call, make_text, make_play
 import os
 from flask_mongoengine import MongoEngine
 from sms_handler import sms_handler
@@ -17,8 +17,6 @@ app.config['MONGODB_SETTINGS'] = {
     'db': DB_NAME,
     'host': DB_HOST,
     'port': DB_PORT,
-    # "username":DB_USER,
-    # 'password':DB_PASS
 }
 db = MongoEngine()
 db.init_app(app)
@@ -40,26 +38,27 @@ class Users(db.Document):
 def hello():
   return "Hello World!"
 
-# @app.route("/static/<path:path>")
-# def send_file(path):
-#     return send_from_directory("static", path)
 
-@app.post("/static/wakeup.xml")
+@app.post("/static/wakeup")
 def send_wakeup():
-    return send_file("./static/wakeup.xml")
+    return Response(make_play("wakeup"), content_type='text/xml')
 
-@app.route("/static/wakeup.mp3")
-def send_wakeup_mp3():
-    return send_file("./static/wakeup.mp3")
+
+
+@app.get("/static/<file_name>")
+def send_static_file(file_name):
+    print(file_name)
+    return send_file(f"./static/{file_name}")
+
 
 @app.post("/sms")
 def reply_to_text():
     return sms_handler(Users=Users, request=request)
 
+@app.post("/voice")
+def reply_to_voice():
+    return Response(make_play("phone_response"), content_type="text/xml")
 
-@app.get("/whats_been_texted")
-def get_texts():
-    return send_file("./whats_been_texted.txt")
 
 
 if __name__ == "__main__":

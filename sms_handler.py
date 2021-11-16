@@ -44,7 +44,8 @@ def sms_handler(Users, request):
             make_text(from_number, f"You completed your water goal for the day great job!")
 
     elif "call me" in body.lower():
-        make_call(from_number)
+        print("received request for call")
+        make_call(from_number, "wakeup")
     else:
         make_text(from_number)
 
