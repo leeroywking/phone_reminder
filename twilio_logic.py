@@ -15,7 +15,7 @@ BASE_URL = os.environ.get("BASE_URL")
 
 def make_call(outgoing_number, file_name):
     call = client.calls.create(
-                            url=f'{BASE_URL}/static/{file_name}',
+                            url=f'{BASE_URL}/play_twiml/{file_name}',
                             to=outgoing_number,
                             from_='+14252175622'
                         )
@@ -49,6 +49,6 @@ def make_text(outgoing_number, body=default_text):
     print(message.sid)
 
 if __name__ == "__main__":
-    # make_call("+14253501717")
-    make_text("+14253501717")
+    make_call("+14253501717", "completed_your_goal")
+    # make_text("+14253501717")
 

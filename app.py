@@ -39,9 +39,13 @@ def hello():
   return "Hello World!"
 
 
-@app.post("/static/wakeup")
-def send_wakeup():
-    return Response(make_play("wakeup"), content_type='text/xml')
+@app.post("/play_twiml/<file>")
+def send_twiml_post(file):
+    return Response(make_play(file), content_type='text/xml')
+
+@app.get("/play_twiml/<file>")
+def send_twiml_get(file):
+    return Response(make_play(file), content_type='text/xml')
 
 
 

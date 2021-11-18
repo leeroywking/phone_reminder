@@ -42,6 +42,7 @@ def sms_handler(Users, request):
             make_text(from_number, f"You have drank {current_user.water_drank}/{current_user.water_goal} of your goal today")
         if current_user.water_goal <= current_user.water_drank:
             make_text(from_number, f"You completed your water goal for the day great job!")
+            make_call(from_number, "completed_your_goal")
 
     elif "call me" in body.lower():
         print("received request for call")
