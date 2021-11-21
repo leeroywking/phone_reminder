@@ -10,7 +10,7 @@ with open("./static/affirmations.txt") as file:
 def get_affirmation():
     affirm = affirmations[random.randint(0,len(affirmations))]
     [words, author] = affirm.split(" - ")
-    output = f"{words}\n   -{author}"
+    output = f"{words}\n   - {author}"
     # print(output)
     return output
 
