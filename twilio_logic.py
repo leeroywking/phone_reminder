@@ -30,7 +30,7 @@ def make_play(file_name):
 #970-hi-0-a-lee
 div = "\n----------\n"
 default_text = (
-    f'You can reply with the text "call me" to receive a call.'\
+    f'You can reply with the text "call me" to receive a call. "affirm me" to recieve a text affirmation'\
     f'{div}Water tracking commands{div}' \
     f'FIRST - to set your goal send\n'\
     f'"help me drink 10 glasses of water" or\n'\

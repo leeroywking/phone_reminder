@@ -1,5 +1,6 @@
 from twilio_logic import make_call, make_text
 import re
+from affirmations import get_affirmation
 
 def make_new_user(from_number, Users):
     Users(phone_number=from_number,
@@ -43,7 +44,10 @@ def sms_handler(Users, request):
         if current_user.water_goal <= current_user.water_drank:
             make_text(from_number, f"You completed your water goal for the day great job!")
             make_call(from_number, "completed_your_goal")
-
+    elif "affirm me" in body.lower():
+        affirmation = get_affirmation()
+        make_text(from_number, affirmation)
+        
     elif "call me" in body.lower():
         print("received request for call")
         make_call(from_number, "wakeup")
