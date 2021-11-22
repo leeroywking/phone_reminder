@@ -49,6 +49,6 @@ def make_text(outgoing_number, body=default_text):
     print(message.sid)
 
 if __name__ == "__main__":
-    make_call("+14253501717", "completed_your_goal")
-    # make_text("+14253501717", "Sensitivity is a sign of life. Better hurt than hardened. I bow to those who keep their hearts open when it is most difficult, those who refuse to keep their armor on any longer than they have to, those who recognize the courage at the heart of vulnerability. After all the misguided warriors destroy each other, the open-hearted will inherit the earth.\n  - Stitch")
+    # make_call("+14253501717", "completed_your_goal")
+    make_text("+14253501717", "You’ve survived every hardship that has come your way.\nKeep going.\n    -Jenna")
 
