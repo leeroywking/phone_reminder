@@ -76,6 +76,11 @@ def reply_to_text():
 def reply_to_voice():
     return Response(make_play("phone_response"), content_type="text/xml")
 
+@app.get("/testingtestingtesting/<tz>/<userrunattime>")
+def reply_to_test(tz, userrunattime):
+    out = PendingTaskActions.make_run_at_time(tz,userrunattime)
+    return out
+
 
 scheduler = BlockingScheduler()
 @scheduler.scheduled_job(IntervalTrigger(seconds=5))
