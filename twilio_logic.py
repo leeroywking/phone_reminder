@@ -37,7 +37,7 @@ default_text = (
     f'"help me drink 100oz of water"\n(can be any unit){div}'\
     f'THEN - update progress send\n'\
     f'"I drank 1 glass of water" or\n'\
-    f'"I have drunk 2 glasses already"'
+    f'"I have drunk 2 glasses already\n"'
 )
 
 def make_text(outgoing_number, body=default_text): 

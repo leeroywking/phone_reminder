@@ -47,6 +47,7 @@ def sms_handler(Users, request):
     elif "affirm me" in body.lower():
         affirmation = get_affirmation()
         make_text(from_number, affirmation)
+
         
     elif "call me" in body.lower():
         print("received request for call")

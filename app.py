@@ -1,8 +1,16 @@
 from flask import Flask, send_file, request, Response
+from datetime import datetime as dt
+import datetime
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from schedule_tasks import PendingTaskActions
 from twilio_logic import make_call, make_text, make_play
+
 import os
 from flask_mongoengine import MongoEngine
 from sms_handler import sms_handler
+
+
 
 # from werkzeug.utils import send_file, send_from_directory
 app = Flask(__name__, static_url_path="/static")
@@ -32,7 +40,12 @@ class Users(db.Document):
     total_calls_received = db.IntField()
     total_calls_sent = db.IntField()
     received_sms_messages = db.StringField()
+    time_zone = db.StringField()
 
+class PendingTasks(db.Document):
+    run_at_time = db.DateTimeField()
+    phone_number = db.StringField()
+    run_action = db.StringField()
 
 @app.route("/")
 def hello():
@@ -64,6 +77,26 @@ def reply_to_voice():
     return Response(make_play("phone_response"), content_type="text/xml")
 
 
+scheduler = BlockingScheduler()
+@scheduler.scheduled_job(IntervalTrigger(seconds=5))
+def check_pending_tasks():
+    current_time = dt.now()
+    seconds = 30
+    minutes_added = datetime.timedelta(seconds = seconds)
+    future_date_and_time = current_time + minutes_added
+    # PendingTaskActions.make_new_task(PendingTasks=PendingTasks, phone_number="+14253501717",run_action="reminder_call",run_at_time=future_date_and_time)
+    # PendingTaskActions.find_over_due_tasks(PendingTasks=PendingTasks)
+scheduler.start()
 
 if __name__ == "__main__":
   app.run()
+
+
+
+
+
+
+
+
+
+
