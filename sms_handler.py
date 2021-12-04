@@ -22,7 +22,7 @@ def sms_handler(Users, PendingTasks, request):
 
     if not Users.objects(phone_number=from_number).first():
         make_new_user(from_number=from_number, Users=Users)
-
+    
     current_user = Users.objects(phone_number=from_number).first()
     current_user.total_sms_received = current_user.total_sms_received +1
     current_user.received_sms_messages = current_user.received_sms_messages + f"{body}\n"
@@ -50,16 +50,42 @@ def sms_handler(Users, PendingTasks, request):
         make_text(from_number, affirmation)
 
     elif "set timezone" in body.lower():
-        offset = re.search("[-+]\d{1,2}([\.]5)?", body)
-        print(offset)
+        try:
+            offset = re.search("[-+]\d{1,2}([\.\:][53])?", body)[0]
+        except TypeError:
+            make_text(current_user.phone_number, 'Oops looks like you used an invalid format to set your offset. Valid formats are as follows\nset timezone +10:30\nset timezone +10.5\nset timezone -8\nset timezone -8:00\noffsets must have a + or - and must either represent decimal hours (+10.5) or hours and minutes (+10:30). If you are still having trouble reach out in #oh-no-your-code-its-broken')
+            return "Error: malformed timezone offset"
+        if ":" in offset: # this will not catch weird behavior like 10.3 to represent 10:30 it only works in decimals and hours:minutes and it doesn't support minutes besides 30
+            [hours, minutes] = [int(num) for num in offset.split(":")]
+            print(hours, minutes)
+            if minutes == 3:
+                if hours < 0:
+                    hours -= 0.5
+                else:
+                    hours += 0.5
+            offset = hours
+        current_user.time_zone_offset = float(offset)
+        make_text(current_user.phone_number, f"You have set your timezone offset to {current_user.time_zone_offset}")
+        current_user.save()
 
     elif "remind me" in body.lower():
-        # Well formed text would look like "remind me to wash the dog at 16:00"
-        run_at_time = "16:00"
-        run_action = "to wash the dog"
+        # Well formed text would look like "remind me to wash the dog at 16:00" or "remind me to drink water at 5pm"
+        if not current_user.time_zone_offset:
+            make_text(current_user.phone_number, 'Looks like you haven\'t set your timezone offset yet.\nPlease visit:\nhttps://www.timeanddate.com/time/zone/\nThis will help you identify your current offset.\nThen send a message in the following format \n"set timezone -8" where "-8" would be replaced by the offset for your timezone\n-8 is the offset for PST in the USA')
+            return "Error: Timezone offset not set"
+        body_list = body.lower().split("at")
+        usr_run_at_time = body_list[-1]
+        reminder = "reminder"
         # need to logic the timezone normalization here
-        PendingTaskActions.make_new_task(PendingTasks, current_user, run_at_time, run_action)
-        
+        time_till_event = PendingTaskActions.make_new_task(PendingTasks, current_user, usr_run_at_time, run_action=reminder)
+        days = time_till_event.days
+        hours = time_till_event.seconds // 3600
+        minutes = (time_till_event.seconds //60)%60
+        # print(f"Days till event: {days}")
+        # print(f"hours till event: {hours}")
+        # print(f"minutes till event: {minutes}")
+        make_text(current_user.phone_number, f"You have made a reminder that will happen in {days} days, {hours} hours, and {minutes} minutes")
+
     elif "call me" in body.lower():
         print("received request for call")
         make_call(from_number, "wakeup")

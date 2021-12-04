@@ -1,7 +1,6 @@
 from flask import Flask, send_file, request, Response
 from datetime import datetime as dt
-import datetime
-from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from schedule_tasks import PendingTaskActions
 from twilio_logic import make_call, make_text, make_play
@@ -40,7 +39,7 @@ class Users(db.Document):
     total_calls_received = db.IntField()
     total_calls_sent = db.IntField()
     received_sms_messages = db.StringField()
-    time_zone_offset = db.StringField()
+    time_zone_offset = db.FloatField()
 
 class PendingTasks(db.Document):
     run_at_time = db.DateTimeField()
@@ -83,10 +82,10 @@ def schedule_new_task_tester():
     pass
 ############################################
 
-scheduler = BlockingScheduler()
+scheduler = BackgroundScheduler()
 @scheduler.scheduled_job(IntervalTrigger(seconds=5))
 def check_pending_tasks():
-    # PendingTaskActions.find_and_run_over_due_tasks(PendingTasks=PendingTasks)
+    PendingTaskActions.find_and_run_over_due_tasks(PendingTasks=PendingTasks)
     pass
 scheduler.start()
 
