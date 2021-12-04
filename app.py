@@ -40,7 +40,7 @@ class Users(db.Document):
     total_calls_received = db.IntField()
     total_calls_sent = db.IntField()
     received_sms_messages = db.StringField()
-    time_zone = db.StringField()
+    time_zone_offset = db.StringField()
 
 class PendingTasks(db.Document):
     run_at_time = db.DateTimeField()
@@ -70,27 +70,24 @@ def send_static_file(file_name):
 
 @app.post("/sms")
 def reply_to_text():
-    return sms_handler(Users=Users, request=request)
+    return sms_handler(Users=Users,PendingTasks=PendingTasks, request=request)
 
 @app.post("/voice")
 def reply_to_voice():
     return Response(make_play("phone_response"), content_type="text/xml")
 
-@app.get("/testingtestingtesting/<tz>/<userrunattime>")
-def reply_to_test(tz, userrunattime):
-    out = PendingTaskActions.make_run_at_time(tz,userrunattime)
-    return out
-
+# DEV ONLY DELETE BEFORE PROD
+############################################
+@app.get("/schedule-new-task/<phone_number>/<task>/run_at_time")
+def schedule_new_task_tester():
+    pass
+############################################
 
 scheduler = BlockingScheduler()
 @scheduler.scheduled_job(IntervalTrigger(seconds=5))
 def check_pending_tasks():
-    current_time = dt.now()
-    seconds = 30
-    minutes_added = datetime.timedelta(seconds = seconds)
-    future_date_and_time = current_time + minutes_added
-    # PendingTaskActions.make_new_task(PendingTasks=PendingTasks, phone_number="+14253501717",run_action="reminder_call",run_at_time=future_date_and_time)
-    # PendingTaskActions.find_over_due_tasks(PendingTasks=PendingTasks)
+    # PendingTaskActions.find_and_run_over_due_tasks(PendingTasks=PendingTasks)
+    pass
 scheduler.start()
 
 if __name__ == "__main__":

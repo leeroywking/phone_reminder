@@ -1,6 +1,7 @@
 from twilio_logic import make_call, make_text
 import re
 from affirmations import get_affirmation
+from schedule_tasks import PendingTaskActions
 
 def make_new_user(from_number, Users):
     Users(phone_number=from_number,
@@ -15,7 +16,7 @@ def make_new_user(from_number, Users):
         ).save()
 
 
-def sms_handler(Users, request):
+def sms_handler(Users, PendingTasks, request):
     from_number = request.values.get("From")
     body = request.values.get("Body")
 
@@ -48,6 +49,16 @@ def sms_handler(Users, request):
         affirmation = get_affirmation()
         make_text(from_number, affirmation)
 
+    elif "set timezone" in body.lower():
+        offset = re.search("[-+]\d{1,2}([\.]5)?", body)
+        print(offset)
+
+    elif "remind me" in body.lower():
+        # Well formed text would look like "remind me to wash the dog at 16:00"
+        run_at_time = "16:00"
+        run_action = "to wash the dog"
+        # need to logic the timezone normalization here
+        PendingTaskActions.make_new_task(PendingTasks, current_user, run_at_time, run_action)
         
     elif "call me" in body.lower():
         print("received request for call")
