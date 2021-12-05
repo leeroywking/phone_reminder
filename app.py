@@ -84,6 +84,9 @@ def reply_to_text():
 def reply_to_voice():
     return Response(make_play("phone_response"), content_type="text/xml")
 
+@app.get("/time")
+def get_time():
+    return dt.utcnow()
 
 scheduler = BackgroundScheduler(timezone="UTC")
 @scheduler.scheduled_job(IntervalTrigger(seconds=10, timezone="UTC"))
