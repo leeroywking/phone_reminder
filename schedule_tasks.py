@@ -38,7 +38,20 @@ class PendingTaskActions():
         else:
             print("Error unknown scheduled action type")
 
-
+    def make_pending_text(PendingTasks, current_user):
+        pending_tasks_for_user = PendingTasks.objects(phone_number=current_user.phone_number)
+        text = ""
+        title = "Pending reminders\n--------------------\n"
+        count = 1
+        for task in pending_tasks_for_user:
+            task.simple_id = count
+            count += 1
+            task.save()
+            text += f'ID:{task.simple_id} {task.run_action} {task.run_at_time + timedelta(hours = current_user.time_zone_offset)} "{task.user_input}"\n---------\n'
+        # print(text)
+        if len(text) == 0:
+            text = "No tasks pending at this time"
+        return title+text
 
     def find_and_run_over_due_tasks(PendingTasks):
         pending_tasks = PendingTasks.objects(run_at_time__lte=dt.utcnow())

@@ -97,8 +97,8 @@ def get_offset_time(offset):
 
 @app.get("/time/<offset>/<user_time_str>")
 def get_offset_user_time(offset, user_time_str):
-    parsed_date = datetimeparser.parse(user_time_str, default=dt.utcnow() + timedelta(hours=offset))
     offset = float(offset)
+    parsed_date = datetimeparser.parse(user_time_str, default=dt.utcnow() + timedelta(hours=offset))
     server_current_day = dt.utcnow().day
     user_current_day = (dt.utcnow() + timedelta(hours=offset)).day
     

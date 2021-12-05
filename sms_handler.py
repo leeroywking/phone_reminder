@@ -130,28 +130,17 @@ def sms_handler(Users, PendingTasks, request):
         make_text(from_number, text)
 
     elif "show pending" in body.lower():
-        pending_tasks_for_user = PendingTasks.objects(phone_number=current_user.phone_number)
-        text = ""
-        title = "Pending reminders\n--------------------\n"
-        count = 1
-        for task in pending_tasks_for_user:
-            task.simple_id = count
-            count += 1
-            task.save()
-            text += f'ID:{task.simple_id} {task.run_action} {task.run_at_time + timedelta(hours = current_user.time_zone_offset)} "{task.user_input}"\n---------\n'
-        # print(text)
-        if len(text) == 0:
-            text = "No tasks pending at this time"
-        make_text(from_number, title+text)
+        output = PendingTaskActions.make_pending_text(PendingTasks, current_user)
+        make_text(from_number, output)
     elif "cancel pending" in body.lower():
         ids = [int(num) for num in re.findall("\d+", body)]
         for id in ids:
-            
             task = PendingTasks.objects(phone_number = current_user.phone_number, simple_id=id)[0]
             print(f"removing id:{id} from database")
             text = f'Deleting Pending Task\n---------\nID:{task.simple_id} {task.run_action} {task.run_at_time + timedelta(hours = current_user.time_zone_offset)} "{task.user_input}"\n---------\n'
             task.delete()
-            make_text(current_user.phone_number, text)
+        remaining_items = PendingTaskActions.make_pending_text(PendingTasks, current_user)
+        make_text(current_user.phone_number, f"deleted IDs {ids} remaining pending items... {remaining_items}")
     else:
         make_text(from_number)
 
