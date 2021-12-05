@@ -92,7 +92,7 @@ def get_time():
 @app.get("/time/<offset>")
 def get_offset_time(offset):
     offset = float(offset)
-    return dt.utcnow() + timedelta(hours=offset)
+    return str(dt.utcnow() + timedelta(hours=offset))
 
 scheduler = BackgroundScheduler(timezone="UTC")
 @scheduler.scheduled_job(IntervalTrigger(seconds=10, timezone="UTC"))
