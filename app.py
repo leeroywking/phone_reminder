@@ -1,5 +1,6 @@
 from flask import Flask, send_file, request, Response
 from datetime import datetime as dt
+from datetime import timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from schedule_tasks import PendingTaskActions
@@ -87,6 +88,11 @@ def reply_to_voice():
 @app.get("/time")
 def get_time():
     return str(dt.utcnow())
+
+@app.get("/time/<offset>")
+def get_offset_time(offset):
+    offset = float(offset)
+    return dt.utcnow() + timedelta(hours=offset)
 
 scheduler = BackgroundScheduler(timezone="UTC")
 @scheduler.scheduled_job(IntervalTrigger(seconds=10, timezone="UTC"))
