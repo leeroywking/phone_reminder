@@ -97,12 +97,16 @@ def get_offset_time(offset):
 
 @app.get("/time/<offset>/<user_time_str>")
 def get_offset_user_time(offset, user_time_str):
-    parsed_date = datetimeparser.parse(user_time_str, default=dt.utcnow() + timedelta(hours=offset))
     offset = float(offset)
+    parsed_usr_run_at_time = datetimeparser.parse(user_time_str, default=dt.utcnow() + timedelta(hours=offset)) # user gave time in local but this converts it to UTC time not properly localized
     server_current_day = dt.utcnow().day
     user_current_day = (dt.utcnow() + timedelta(hours=offset)).day
+    if server_current_day > user_current_day:
+        parsed_usr_run_at_time + timedelta(days=-1)
     
-    return str(f"parsed date{parsed_date}\noffset:{offset}\nserver_current_day:{server_current_day}\nuser_current_day:{user_current_day}\n")
+    run_at_time = parsed_usr_run_at_time - timedelta(hours=offset)
+    
+    return str(f"parsed date{parsed_usr_run_at_time}    offset:{offset} server_current_day:{server_current_day} user_current_day:{user_current_day} run_at_time:{run_at_time}")
 
 
 scheduler = BackgroundScheduler(timezone="UTC")
