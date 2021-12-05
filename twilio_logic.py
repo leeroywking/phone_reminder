@@ -172,6 +172,7 @@ helps = {
     "reminders": reminder_help_text,
     "water tracking":water_text, 
     "timezone":timezone_help_text,
+    "time zone":timezone_help_text,
     "misc":help_misc,
     "pending": help_pending_management
 }
