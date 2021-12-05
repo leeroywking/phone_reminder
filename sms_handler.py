@@ -1,7 +1,9 @@
-from twilio_logic import make_call, make_text
+from datetime import datetime, timedelta
+from twilio_logic import make_call, make_text, helper_text_maker, timezone_help_text, reminder_text
 import re
 from affirmations import get_affirmation
 from schedule_tasks import PendingTaskActions
+
 
 def make_new_user(from_number, Users):
     Users(phone_number=from_number,
@@ -49,11 +51,27 @@ def sms_handler(Users, PendingTasks, request):
         affirmation = get_affirmation()
         make_text(from_number, affirmation)
 
+    elif "daily affirmation on" in body.lower() or "daily affirmations on" in body.lower():
+        if not current_user.time_zone_offset:
+            make_text(current_user.phone_number, timezone_help_text)
+            return "Error: Timezone offset not set"
+        current_user.daily_affirmation = True
+        current_user.save()
+        make_text(current_user.phone_number, "You subscribed to daily affirmations")
+
+    elif "daily affirmation off" in body.lower() or "daily affirmations off" in body.lower():
+        current_user.daily_affirmation = False
+        current_user.save()
+        pending_affirm = PendingTasks.objects(phone_number=current_user.phone_number, run_action="affirm")
+        if pending_affirm:
+            pending_affirm.delete()
+        make_text(current_user.phone_number, "You unsubscribed from daily affirmations")
+
     elif "set timezone" in body.lower():
         try:
             offset = re.search("[-+]\d{1,2}([\.\:][53])?", body)[0]
         except TypeError:
-            make_text(current_user.phone_number, 'Oops looks like you used an invalid format to set your offset. Valid formats are as follows\nset timezone +10:30\nset timezone +10.5\nset timezone -8\nset timezone -8:00\noffsets must have a + or - and must either represent decimal hours (+10.5) or hours and minutes (+10:30). If you are still having trouble reach out in #oh-no-your-code-its-broken')
+            make_text(current_user.phone_number, timezone_help_text)
             return "Error: malformed timezone offset"
         if ":" in offset: # this will not catch weird behavior like 10.3 to represent 10:30 it only works in decimals and hours:minutes and it doesn't support minutes besides 30
             [hours, minutes] = [int(num) for num in offset.split(":")]
@@ -71,24 +89,62 @@ def sms_handler(Users, PendingTasks, request):
     elif "remind me" in body.lower():
         # Well formed text would look like "remind me to wash the dog at 16:00" or "remind me to drink water at 5pm"
         if not current_user.time_zone_offset:
-            make_text(current_user.phone_number, 'Looks like you haven\'t set your timezone offset yet.\nPlease visit:\nhttps://www.timeanddate.com/time/zone/\nThis will help you identify your current offset.\nThen send a message in the following format \n"set timezone -8" where "-8" would be replaced by the offset for your timezone\n-8 is the offset for PST in the USA')
+            make_text(current_user.phone_number, timezone_help_text)
             return "Error: Timezone offset not set"
-        body_list = body.lower().split("at")
+        if "at" in body.lower():
+            body_list = body.lower().split("at")
+        elif "on" in body.lower():
+            body_list = body.lower().split("on")
+        else:
+            make_text(current_user.phone_number, reminder_text)
+            return "Error: improper reminder format"
+
         usr_run_at_time = body_list[-1]
-        reminder = "reminder"
-        # need to logic the timezone normalization here
-        time_till_event = PendingTaskActions.make_new_task(PendingTasks, current_user, usr_run_at_time, run_action=reminder)
+        reminder_body = body_list[0].split("to")[1]
+        print(reminder_body)
+        time_till_event = PendingTaskActions.make_new_task(
+            PendingTasks = PendingTasks, 
+            current_user = current_user, 
+            usr_run_at_time = usr_run_at_time, 
+            run_action="reminder", 
+            user_input_text=reminder_body
+            )
         days = time_till_event.days
         hours = time_till_event.seconds // 3600
         minutes = (time_till_event.seconds //60)%60
-        # print(f"Days till event: {days}")
-        # print(f"hours till event: {hours}")
-        # print(f"minutes till event: {minutes}")
         make_text(current_user.phone_number, f"You have made a reminder that will happen in {days} days, {hours} hours, and {minutes} minutes")
 
     elif "call me" in body.lower():
         print("received request for call")
         make_call(from_number, "wakeup")
+    
+    elif "help" in body.lower():
+        text = helper_text_maker(body.lower())
+        make_text(from_number, text)
+
+    elif "show pending" in body.lower():
+        pending_tasks_for_user = PendingTasks.objects(phone_number=current_user.phone_number)
+        text = ""
+        title = "Pending reminders\n--------------------\n"
+        count = 1
+        for task in pending_tasks_for_user:
+            task.simple_id = count
+            count += 1
+            task.save()
+            text += f'ID:{task.simple_id} {task.run_action} {task.run_at_time + timedelta(hours = current_user.time_zone_offset)} "{task.user_input}"\n---------\n'
+        # print(text)
+        if len(text) == 0:
+            text = "No tasks pending at this time"
+        make_text(from_number, title+text)
+    elif "cancel pending" in body.lower():
+        ids = [int(num) for num in re.findall("\d+", body)]
+        for id in ids:
+            
+            task = PendingTasks.objects(phone_number = current_user.phone_number, simple_id=id)[0]
+            print(f"removing id:{id} from database")
+            text = f'Deleting Pending Task\n---------\nID:{task.simple_id} {task.run_action} {task.run_at_time + timedelta(hours = current_user.time_zone_offset)} "{task.user_input}"\n---------\n'
+            task.delete()
+            make_text(current_user.phone_number, text)
     else:
         make_text(from_number)
 

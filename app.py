@@ -10,7 +10,6 @@ from flask_mongoengine import MongoEngine
 from sms_handler import sms_handler
 
 
-
 # from werkzeug.utils import send_file, send_from_directory
 app = Flask(__name__, static_url_path="/static")
 
@@ -40,11 +39,14 @@ class Users(db.Document):
     total_calls_sent = db.IntField()
     received_sms_messages = db.StringField()
     time_zone_offset = db.FloatField()
+    daily_affirmation = db.BooleanField()
 
 class PendingTasks(db.Document):
     run_at_time = db.DateTimeField()
     phone_number = db.StringField()
     run_action = db.StringField()
+    user_input = db.StringField()
+    simple_id = db.IntField()
 
 @app.route("/")
 def hello():
@@ -82,11 +84,21 @@ def schedule_new_task_tester():
     pass
 ############################################
 
-scheduler = BackgroundScheduler()
-@scheduler.scheduled_job(IntervalTrigger(seconds=5))
+scheduler = BackgroundScheduler(timezone="UTC")
+@scheduler.scheduled_job(IntervalTrigger(seconds=10, timezone="UTC"))
 def check_pending_tasks():
     PendingTaskActions.find_and_run_over_due_tasks(PendingTasks=PendingTasks)
     pass
+
+@scheduler.scheduled_job("cron",second="5") # for daily affirmations
+def schedule_affirmations():
+    print("this runs every hour------------------------------------------------------")
+    users_to_affirm = Users.objects(daily_affirmation=True)
+    for user in users_to_affirm:
+        if not PendingTasks.objects(phone_number=user.phone_number, run_action="affirm"):
+            PendingTaskActions.make_new_task(PendingTasks, current_user=user, usr_run_at_time="9:00am", run_action="affirm", user_input_text="Daily Affirmation")
+        pass
+
 scheduler.start()
 
 if __name__ == "__main__":
