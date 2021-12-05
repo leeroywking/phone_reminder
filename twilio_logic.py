@@ -1,6 +1,7 @@
 import os
 from twilio.rest import Client
-from twilio.twiml.voice_response import VoiceResponse, Play
+from twilio.twiml.voice_response import VoiceResponse
+import urllib
 from textwrap import wrap
 from dotenv import load_dotenv
 load_dotenv()
@@ -14,17 +15,23 @@ client = Client(account_sid, auth_token)\
 
 BASE_URL = os.environ.get("BASE_URL")
 
-def make_call(outgoing_number, file_name):
+def make_call(outgoing_number, file_name, say_text=""):
+    parsed_say_text = urllib.parse.quote(say_text)
+    print(parsed_say_text)
     call = client.calls.create(
-                            url=f'{BASE_URL}/play_twiml/{file_name}',
+                            url=f'{BASE_URL}/play_twiml/{file_name}/{parsed_say_text}',
                             to=outgoing_number,
                             from_='+14252175622'
                         )
     print(call.sid)
 
-def make_play(file_name):
+def make_play(file_name, say_text = ""):
     response = VoiceResponse()
-    response.play(f'{BASE_URL}/static/{file_name}.mp3', loop=2)
+    response.play(f'{BASE_URL}/static/{file_name}.mp3')
+    if len(say_text) > 0:
+        response.pause(1)
+        response.say(say_text)
+        response.pause(1)
     return str(response)
 
 
@@ -59,13 +66,13 @@ intro_text = (
     f'{help_misc}'
 )
 
-reminder_text = (
+reminder_help_text = (
     "To set a reminder please send a message that follows one of these examples"\
     f"{div}"
-    '"remind me to wash the dog at 5pm"\n'
+    '"remind me to wash the dog at 5pm" (if its past 5pm it will use 5pm the next day)\n'
     '"remind me to call sam at 9am"\n'
-    '"remind me to do the dishes on friday dec 20th 10am\n'
-    '"remind me to fight god on sunday"'
+    '"phone-remind me to do the dishes on friday dec 20th 10am\n'
+    '"phone-remind me to fight god on sunday" (defaults to midnight)'
     f"{div}"
     'Things that don\'t work'
     f"{small_div}"
@@ -154,7 +161,7 @@ help_all = (
     f"{div}"
     f"{timezone_help_text}"
     f"{div}"
-    f"{reminder_text}"
+    f"{reminder_help_text}"
     f"{div}"
     f"{daily_affirmation_text}"
 )
@@ -162,7 +169,7 @@ default_text = intro_text
 
 helps = {
     "affirmations":daily_affirmation_text,
-    "reminders": reminder_text,
+    "reminders": reminder_help_text,
     "water tracking":water_text, 
     "timezone":timezone_help_text,
     "misc":help_misc,

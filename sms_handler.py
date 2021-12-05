@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from twilio_logic import make_call, make_text, helper_text_maker, timezone_help_text, reminder_text
+from twilio_logic import make_call, make_text, helper_text_maker, timezone_help_text, reminder_help_text
 import re
 from affirmations import get_affirmation
 from schedule_tasks import PendingTaskActions
@@ -96,17 +96,24 @@ def sms_handler(Users, PendingTasks, request):
         elif " at " in body.lower():
             body_list = body.lower().split(" at ")
         else:
-            make_text(current_user.phone_number, reminder_text)
+            make_text(current_user.phone_number, reminder_help_text)
             return "Error: improper reminder format"
 
         usr_run_at_time = body_list[-1]
-        reminder_body = body_list[0].split("remind me to ")[1]
-        print(reminder_body)
+        try:
+            reminder_body = body_list[0].split("remind me to ")[1]
+        except IndexError:
+            make_text(current_user.phone_number, reminder_help_text)
+            return "Error: improper reminder format"
+        # print(reminder_body)
+        reminder_type = "reminder"
+        if "phone-remind" in body.lower():
+            reminder_type = "phone-reminder"
         time_till_event = PendingTaskActions.make_new_task(
             PendingTasks = PendingTasks, 
             current_user = current_user, 
             usr_run_at_time = usr_run_at_time, 
-            run_action="reminder", 
+            run_action=reminder_type, 
             user_input_text=reminder_body
             )
         days = time_till_event.days

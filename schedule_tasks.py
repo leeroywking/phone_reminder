@@ -2,7 +2,7 @@ from datetime import datetime as dt
 from datetime import timedelta
 from dateutil import parser as datetimeparser
 from affirmations import get_affirmation
-from twilio_logic import make_text
+from twilio_logic import make_call, make_text
 
 
 class PendingTaskActions():
@@ -28,6 +28,8 @@ class PendingTaskActions():
             make_text(task.phone_number, affirmation)
         elif task.run_action == "reminder":
             make_text(task.phone_number, f"You wanted to be reminded of this now:\n{task.user_input}")
+        elif task.run_action == "phone-reminder":
+            make_call(task.phone_number,"reminder",task.user_input)
         else:
             print("Error unknown scheduled action type")
 

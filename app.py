@@ -61,6 +61,13 @@ def send_twiml_post(file):
 def send_twiml_get(file):
     return Response(make_play(file), content_type='text/xml')
 
+@app.get("/play_twiml/<file>/<say_text>")
+def send_complex_twiml(file, say_text):
+    return Response(make_play(file,say_text= say_text), content_type="text/xml")
+
+@app.post("/play_twiml/<file>/<say_text>")
+def send_complex_twiml_post(file, say_text = ""):
+    return Response(make_play(file,say_text= say_text), content_type="text/xml")
 
 
 @app.get("/static/<file_name>")
@@ -77,12 +84,6 @@ def reply_to_text():
 def reply_to_voice():
     return Response(make_play("phone_response"), content_type="text/xml")
 
-# DEV ONLY DELETE BEFORE PROD
-############################################
-@app.get("/schedule-new-task/<phone_number>/<task>/run_at_time")
-def schedule_new_task_tester():
-    pass
-############################################
 
 scheduler = BackgroundScheduler(timezone="UTC")
 @scheduler.scheduled_job(IntervalTrigger(seconds=10, timezone="UTC"))
