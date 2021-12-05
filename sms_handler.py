@@ -67,7 +67,7 @@ def sms_handler(Users, PendingTasks, request):
             pending_affirm.delete()
         make_text(current_user.phone_number, "You unsubscribed from daily affirmations")
 
-    elif "set timezone" in body.lower():
+    elif "set timezone" in body.lower() or "set time zone" in body.lower():
         try:
             offset = re.search("[-+]\d{1,2}([\.\:][53])?", body)[0]
         except TypeError:
