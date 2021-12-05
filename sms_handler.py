@@ -54,7 +54,7 @@ def sms_handler(Users, PendingTasks, request):
     elif "daily affirmation on" in body.lower() or "daily affirmations on" in body.lower():
         if not current_user.time_zone_offset:
             make_text(current_user.phone_number, timezone_help_text)
-            return "Error: Timezone offset not set"
+            return "Error: Time zone offset not set"
         current_user.daily_affirmation = True
         current_user.save()
         make_text(current_user.phone_number, "You subscribed to daily affirmations")
@@ -67,12 +67,12 @@ def sms_handler(Users, PendingTasks, request):
             pending_affirm.delete()
         make_text(current_user.phone_number, "You unsubscribed from daily affirmations")
 
-    elif "set timezone" in body.lower():
+    elif "set timezone" in body.lower() or "set time zone" in body.lower():
         try:
             offset = re.search("[-+]\d{1,2}([\.\:][53])?", body)[0]
         except TypeError:
             make_text(current_user.phone_number, timezone_help_text)
-            return "Error: malformed timezone offset"
+            return "Error: malformed time zone offset"
         if ":" in offset: # this will not catch weird behavior like 10.3 to represent 10:30 it only works in decimals and hours:minutes and it doesn't support minutes besides 30
             [hours, minutes] = [int(num) for num in offset.split(":")]
             print(hours, minutes)
@@ -83,14 +83,14 @@ def sms_handler(Users, PendingTasks, request):
                     hours += 0.5
             offset = hours
         current_user.time_zone_offset = float(offset)
-        make_text(current_user.phone_number, f"You have set your timezone offset to {current_user.time_zone_offset}")
+        make_text(current_user.phone_number, f"You have set your time zone offset to {current_user.time_zone_offset}")
         current_user.save()
 
     elif "remind me" in body.lower():
         # Well formed text would look like "remind me to wash the dog at 16:00" or "remind me to drink water at 5pm"
         if not current_user.time_zone_offset:
             make_text(current_user.phone_number, timezone_help_text)
-            return "Error: Timezone offset not set"
+            return "Error: Time zone offset not set"
         if " on " in body.lower():
             body_list = body.lower().split(" on ")
         elif " at " in body.lower():
