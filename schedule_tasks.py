@@ -12,6 +12,7 @@ class PendingTaskActions():
         # need to shift offset
         run_at_time = parsed_usr_run_at_time - timedelta(hours=offset) # this should properly normalize the user provided time to UTC so -8 seattle would be increased by 8 hours
         if run_at_time < dt.utcnow():
+            print("shifting by one day so it doesn't land in the past")
             run_at_time = run_at_time + timedelta(days=1)
         PendingTasks(
             phone_number=current_user.phone_number,
