@@ -97,8 +97,8 @@ def get_offset_time(offset):
 
 @app.get("/time/<offset>/<user_time_str>")
 def get_offset_user_time(offset, user_time_str):
-    offset = float(offset)
     parsed_date = datetimeparser.parse(user_time_str, default=dt.utcnow() + timedelta(hours=offset))
+    offset = float(offset)
     server_current_day = dt.utcnow().day
     user_current_day = (dt.utcnow() + timedelta(hours=offset)).day
     
@@ -106,12 +106,12 @@ def get_offset_user_time(offset, user_time_str):
 
 
 scheduler = BackgroundScheduler(timezone="UTC")
-@scheduler.scheduled_job(IntervalTrigger(seconds=10, timezone="UTC"))
+@scheduler.scheduled_job(IntervalTrigger(seconds=30, timezone="UTC"))
 def check_pending_tasks():
     PendingTaskActions.find_and_run_over_due_tasks(PendingTasks=PendingTasks)
     pass
 
-@scheduler.scheduled_job("cron",second="5") # for daily affirmations
+@scheduler.scheduled_job(IntervalTrigger(minutes=5, timezone="UTC")) # for daily affirmations
 def schedule_affirmations():
     # print("This runs every minute------------------------------------------------------")
     users_to_affirm = Users.objects(daily_affirmation=True)
