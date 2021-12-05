@@ -140,7 +140,7 @@ def sms_handler(Users, PendingTasks, request):
             text = f'Deleting Pending Task\n---------\nID:{task.simple_id} {task.run_action} {task.run_at_time + timedelta(hours = current_user.time_zone_offset)} "{task.user_input}"\n---------\n'
             task.delete()
         remaining_items = PendingTaskActions.make_pending_text(PendingTasks, current_user)
-        make_text(current_user.phone_number, f"deleted IDs {ids} remaining pending items... {remaining_items}")
+        make_text(current_user.phone_number, f"deleted IDs {ids} remaining pending items...\n{remaining_items}")
     else:
         make_text(from_number)
 
