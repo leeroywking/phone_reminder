@@ -99,6 +99,7 @@ def get_offset_time(offset):
 def get_offset_user_time(offset, user_time_str):
     offset = float(offset)
     parsed_usr_run_at_time = datetimeparser.parse(user_time_str, default=dt.utcnow() + timedelta(hours=offset)) # user gave time in local but this converts it to UTC time not properly localized
+    parsed_usr_run_at_time = parsed_usr_run_at_time - timedelta(minutes = parsed_usr_run_at_time.minute, seconds = parsed_usr_run_at_time.second) # necessary to cancel out the default values written in the above line for minutes and seconds
     server_current_day = dt.utcnow().day
     user_current_day = (dt.utcnow() + timedelta(hours=offset)).day
     if server_current_day > user_current_day:
