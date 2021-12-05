@@ -5,6 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from schedule_tasks import PendingTaskActions
 from twilio_logic import make_call, make_text, make_play
+from dateutil import parser as datetimeparser
 
 import os
 from flask_mongoengine import MongoEngine
@@ -93,6 +94,16 @@ def get_time():
 def get_offset_time(offset):
     offset = float(offset)
     return str(dt.utcnow() + timedelta(hours=offset))
+
+@app.get("/time/<offset>/<user_time_str>")
+def get_offset_user_time(offset, user_time_str):
+    parsed_date = datetimeparser.parse(user_time_str, default=dt.utcnow() + timedelta(hours=offset))
+    offset = float(offset)
+    server_current_day = dt.utcnow().day
+    user_current_day = (dt.utcnow() + timedelta(hours=offset)).day
+    
+    return str(f"parsed date{parsed_date}\noffset:{offset}\nserver_current_day:{server_current_day}\nuser_current_day:{user_current_day}\n")
+
 
 scheduler = BackgroundScheduler(timezone="UTC")
 @scheduler.scheduled_job(IntervalTrigger(seconds=10, timezone="UTC"))
