@@ -19,7 +19,7 @@ class PendingTaskActions():
             run_action=run_action,
             user_input=user_input_text
             ).save()
-        print(f"adding task for {current_user.phone_number} at {run_at_time} of {run_action}")
+        print(f"adding task for {current_user.phone_number} at {usr_run_at_time} of {run_action}")
         return run_at_time - dt.utcnow()
 
     def run_scheduled_task(task):
@@ -35,12 +35,12 @@ class PendingTaskActions():
 
     def find_and_run_over_due_tasks(PendingTasks):
         pending_tasks = PendingTasks.objects(run_at_time__lte=dt.utcnow())
-        print("checking pending tasks")
+        # print("checking pending tasks")
         for task in pending_tasks:
             PendingTaskActions.run_scheduled_task(task)
-            print(f"{task.run_action} - {task.phone_number} -------------------------------------------------")
+            print(f"Scheduled action:{task.run_action} - {task.phone_number}")
             task.delete()
-        print("done checking pending tasks")
+        # print("done checking pending tasks")
 
     
 if __name__ == "__main__":

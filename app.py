@@ -92,7 +92,7 @@ def check_pending_tasks():
 
 @scheduler.scheduled_job("cron",second="5") # for daily affirmations
 def schedule_affirmations():
-    print("this runs every hour------------------------------------------------------")
+    # print("This runs every minute------------------------------------------------------")
     users_to_affirm = Users.objects(daily_affirmation=True)
     for user in users_to_affirm:
         if not PendingTasks.objects(phone_number=user.phone_number, run_action="affirm"):

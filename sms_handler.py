@@ -91,16 +91,16 @@ def sms_handler(Users, PendingTasks, request):
         if not current_user.time_zone_offset:
             make_text(current_user.phone_number, timezone_help_text)
             return "Error: Timezone offset not set"
-        if "at" in body.lower():
-            body_list = body.lower().split("at")
-        elif "on" in body.lower():
-            body_list = body.lower().split("on")
+        if " on " in body.lower():
+            body_list = body.lower().split(" on ")
+        elif " at " in body.lower():
+            body_list = body.lower().split(" at ")
         else:
             make_text(current_user.phone_number, reminder_text)
             return "Error: improper reminder format"
 
         usr_run_at_time = body_list[-1]
-        reminder_body = body_list[0].split("to")[1]
+        reminder_body = body_list[0].split("remind me to ")[1]
         print(reminder_body)
         time_till_event = PendingTaskActions.make_new_task(
             PendingTasks = PendingTasks, 
