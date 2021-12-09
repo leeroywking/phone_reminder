@@ -8,14 +8,16 @@ from twilio_logic import make_call, make_text
 class PendingTaskActions():
     def make_new_task(PendingTasks, current_user, usr_run_at_time, run_action:str, user_input_text:str):
         offset = current_user.time_zone_offset
-        parsed_usr_run_at_time = datetimeparser.parse(usr_run_at_time, default=dt.utcnow() + timedelta(hours=offset)) # user gave time in local but this converts it to UTC time not properly localized
-        server_current_day = dt.utcnow().day
-        user_current_day = (dt.utcnow() + timedelta(hours=offset)).day
+        now = dt.utcnow()
+        default_time = now + timedelta(minutes=-1*now.minute, seconds=-1*now.second, microseconds=-1 * now.microsecond)
+        parsed_usr_run_at_time = datetimeparser.parse(usr_run_at_time, default=(default_time) + timedelta(hours=offset)) # user gave time in local but this converts it to UTC time not properly localized
+        server_current_day = now.day
+        user_current_day = (now + timedelta(hours=offset)).day
         if server_current_day > user_current_day:
             parsed_usr_run_at_time + timedelta(days=-1)
         
         run_at_time = parsed_usr_run_at_time - timedelta(hours=offset) # this should properly normalize the user provided time to UTC so -8 seattle would be increased by 8 hours
-        if run_at_time < dt.utcnow():
+        if run_at_time < now:
             print("shifting by one day so it doesn't land in the past")
             run_at_time = run_at_time + timedelta(days=1)
         PendingTasks(
@@ -25,7 +27,7 @@ class PendingTaskActions():
             user_input=user_input_text
             ).save()
         print(f"adding task for {current_user.phone_number} at {usr_run_at_time} of {run_action}")
-        return run_at_time - dt.utcnow()
+        return run_at_time - now
 
     def run_scheduled_task(task):
         if task.run_action == "affirm":
