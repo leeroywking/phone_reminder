@@ -72,7 +72,7 @@ def reply_to_text():
 
 @app.post("/voice")
 def reply_to_voice():
-    return Response(make_play("phone_response"), content_type="text/xml")
+    return Response(make_play("phone_response", say_text=" "), content_type="text/xml")
 
 @app.get("/time")
 def get_time():
