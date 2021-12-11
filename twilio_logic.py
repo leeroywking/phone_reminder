@@ -15,22 +15,27 @@ client = Client(account_sid, auth_token)\
 
 BASE_URL = os.environ.get("BASE_URL")
 
-def make_call(outgoing_number, file_name, say_text=""):
+def make_call(outgoing_number, file_name, say_text):
     parsed_say_text = urllib.parse.quote(say_text)
-    print(parsed_say_text)
+    # print(parsed_say_text)
+    query = {'say_text':parsed_say_text, 'file':file_name}
+    q = urllib.parse.urlencode(query)
+    url = f'{BASE_URL}/play_twiml?{q}'
+    # print(url)
     call = client.calls.create(
-                            url=f'{BASE_URL}/play_twiml/{file_name}/{parsed_say_text}',
+                            url=url,
                             to=outgoing_number,
                             from_='+14252175622'
                         )
     print(call.sid)
 
-def make_play(file_name, say_text = ""):
+def make_play(file_name, say_text):
     response = VoiceResponse()
+    response.pause(1)
     response.play(f'{BASE_URL}/static/{file_name}.mp3')
     if len(say_text) > 0:
         response.pause(1)
-        response.say(say_text)
+        response.say(urllib.parse.unquote(say_text))
         response.pause(1)
     return str(response)
 

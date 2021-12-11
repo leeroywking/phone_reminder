@@ -54,23 +54,11 @@ class PendingTasks(db.Document):
 def hello():
   return "Hello World!"
 
-
-@app.post("/play_twiml/<file>")
-def send_twiml_post(file):
-    return Response(make_play(file), content_type='text/xml')
-
-@app.get("/play_twiml/<file>")
-def send_twiml_get(file):
-    return Response(make_play(file), content_type='text/xml')
-
-@app.get("/play_twiml/<file>/<say_text>")
-def send_complex_twiml(file, say_text):
-    return Response(make_play(file,say_text= say_text), content_type="text/xml")
-
-@app.post("/play_twiml/<file>/<say_text>")
-def send_complex_twiml_post(file, say_text = ""):
-    return Response(make_play(file,say_text= say_text), content_type="text/xml")
-
+@app.route("/play_twiml", methods = ["POST","GET"])
+def play_twiml():
+    say_text = request.args.get("say_text") or " "
+    file = request.args.get("file")
+    return Response(make_play(file, say_text), content_type="text/xml")
 
 @app.get("/static/<file_name>")
 def send_static_file(file_name):

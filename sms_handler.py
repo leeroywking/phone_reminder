@@ -46,7 +46,7 @@ def sms_handler(Users, PendingTasks, request):
             make_text(from_number, f"You have drank {current_user.water_drank}/{current_user.water_goal} of your goal today")
         if current_user.water_goal <= current_user.water_drank:
             make_text(from_number, f"You completed your water goal for the day great job!")
-            make_call(from_number, "completed_your_goal")
+            make_call(from_number, "completed_your_goal", " ")
     elif "affirm me" in body.lower():
         affirmation = get_affirmation()
         make_text(from_number, affirmation)
@@ -123,7 +123,7 @@ def sms_handler(Users, PendingTasks, request):
 
     elif "call me" in body.lower():
         print("received request for call")
-        make_call(from_number, "wakeup")
+        make_call(from_number, "wakeup",say_text=" ")
     
     elif "help" in body.lower():
         text = helper_text_maker(body.lower())
